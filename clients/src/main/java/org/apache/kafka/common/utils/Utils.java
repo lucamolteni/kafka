@@ -1371,6 +1371,18 @@ public final class Utils {
         }
     }
 
+   /**
+     * Write the contents of a buffer to an output stream. The bytes are copied from the current position
+     * in the buffer.
+     * @param out The output to write to
+     * @param buffer The buffer to write from
+     * @param length The number of bytes to write
+     * @throws IOException For any errors writing to the output
+     */
+    public static void writeTo(ByteBufferOutputStream out, ByteBuffer buffer) throws IOException {
+        out.write(buffer);
+    }
+
     public static <T> List<T> toList(Iterable<T> iterable) {
         return toList(iterable.iterator());
     }

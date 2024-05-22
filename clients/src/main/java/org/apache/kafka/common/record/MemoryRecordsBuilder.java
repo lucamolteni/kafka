@@ -665,7 +665,7 @@ public class MemoryRecordsBuilder implements AutoCloseable {
             if (baseTimestamp == null)
                 baseTimestamp = timestamp;
 
-            int sizeInBytes = DefaultRecord.writeTo(appendStream,
+            int sizeInBytes = DefaultRecord.writeTo(bufferStream,
                 offsetDelta,
                 timestamp - baseTimestamp,
                 record.key(),
@@ -722,7 +722,7 @@ public class MemoryRecordsBuilder implements AutoCloseable {
         ensureOpenForRecordAppend();
         int offsetDelta = (int) (offset - baseOffset);
         long timestampDelta = timestamp - baseTimestamp;
-        int sizeInBytes = DefaultRecord.writeTo(appendStream, offsetDelta, timestampDelta, key, value, headers);
+        int sizeInBytes = DefaultRecord.writeTo(bufferStream, offsetDelta, timestampDelta, key, value, headers);
         recordWritten(offset, timestamp, sizeInBytes);
     }
 
