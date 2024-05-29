@@ -17,6 +17,9 @@
 package org.apache.kafka.common.utils;
 
 import java.io.OutputStream;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.nio.ByteBuffer;
 
 /**
@@ -75,6 +78,50 @@ public class ByteBufferOutputStream extends OutputStream {
         ensureRemaining(sourceBuffer.remaining());
         buffer.put(sourceBuffer);
     }
+
+
+    public void write(ByteBuffer sourceBuffer, int length) {
+        ensureRemaining(length);
+        int currentPosition = buffer.position();
+        // This is a workaround for the fact that ByteBuffer.put(ByteBuffer) is not available in Java 9
+        try {
+            BYTE_BUFFER_WRITE_OFFSET.invoke(buffer, currentPosition, sourceBuffer,
+                                                            sourceBuffer.position(),
+                                            length);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+        // We need to manually update the position since when using this type of copy
+        // The positions of both buffers are unchanged.
+        buffer.position(currentPosition + length);
+    }
+
+    private static final MethodHandle BYTE_BUFFER_WRITE_OFFSET;
+
+    static {
+        MethodHandle byteBufferWriteOffset = null;
+        if (Java.IS_JAVA9_COMPATIBLE) {
+            try {
+                Class[] parameters = {int.class, ByteBuffer.class, int.class, int.class};
+                MethodType methodType = MethodType.methodType(ByteBuffer.class, parameters);
+                byteBufferWriteOffset = MethodHandles.publicLookup().findVirtual(ByteBuffer.class, "put", methodType);
+            } catch (Throwable t) {
+                handleUpdateThrowable(t);
+            }
+        }
+        BYTE_BUFFER_WRITE_OFFSET = byteBufferWriteOffset;
+    }
+
+    private static void handleUpdateThrowable(Throwable t) {
+        if (t instanceof RuntimeException) {
+            throw (RuntimeException) t;
+        }
+        if (t instanceof Error) {
+            throw (Error) t;
+        }
+        throw new IllegalStateException(t);
+    }
+
 
     public ByteBuffer buffer() {
         return buffer;

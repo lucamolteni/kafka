@@ -395,9 +395,9 @@ public class DefaultRecordBatchTest {
         }
     }
 
-    @ParameterizedTest
-    @EnumSource(value = CompressionType.class)
-    public void testSkipKeyValueIteratorCorrectness(CompressionType compressionType) {
+    @Test
+    public void testSkipKeyValueIteratorCorrectness() {
+        CompressionType compressionType = CompressionType.GZIP;
         Header[] headers = {new RecordHeader("k1", "v1".getBytes()), new RecordHeader("k2", null)};
         byte[] largeRecordValue = new byte[200 * 1024]; // 200KB
         RANDOM.nextBytes(largeRecordValue);

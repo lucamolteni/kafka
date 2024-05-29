@@ -722,7 +722,12 @@ public class MemoryRecordsBuilder implements AutoCloseable {
         ensureOpenForRecordAppend();
         int offsetDelta = (int) (offset - baseOffset);
         long timestampDelta = timestamp - baseTimestamp;
-        int sizeInBytes = DefaultRecord.writeTo(bufferStream, offsetDelta, timestampDelta, key, value, headers);
+        int sizeInBytes;
+        if (CompressionType.NONE == compressionType) {
+            sizeInBytes = DefaultRecord.writeTo(bufferStream, offsetDelta, timestampDelta, key, value, headers);
+        } else {
+            sizeInBytes = DefaultRecord.writeTo(appendStream, offsetDelta, timestampDelta, key, value, headers);
+        }
         recordWritten(offset, timestamp, sizeInBytes);
     }
 

@@ -24,7 +24,6 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.stubbing.OngoingStubbing;
 
 import java.io.Closeable;
-import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
@@ -198,8 +197,8 @@ public class UtilsTest {
     private void doTestWriteToByteBuffer(ByteBuffer source, ByteBuffer dest) throws IOException {
         int numBytes = source.remaining();
         int position = source.position();
-        DataOutputStream out = new DataOutputStream(new ByteBufferOutputStream(dest));
-        Utils.writeTo(out, source, source.remaining());
+        ByteBufferOutputStream destBuffer = new ByteBufferOutputStream(dest);
+        Utils.writeTo(destBuffer, source, source.remaining());
         dest.flip();
         assertEquals(numBytes, dest.remaining());
         assertEquals(position, source.position());

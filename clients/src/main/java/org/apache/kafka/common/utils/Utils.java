@@ -1379,8 +1379,8 @@ public final class Utils {
      * @param length The number of bytes to write
      * @throws IOException For any errors writing to the output
      */
-    public static void writeTo(ByteBufferOutputStream out, ByteBuffer buffer) throws IOException {
-        out.write(buffer);
+    public static void writeTo(ByteBufferOutputStream out, ByteBuffer buffer, int length) throws IOException {
+        out.write(buffer, length);
     }
 
     public static <T> List<T> toList(Iterable<T> iterable) {

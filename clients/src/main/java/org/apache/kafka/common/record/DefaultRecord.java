@@ -237,7 +237,7 @@ public class DefaultRecord implements Record {
         } else {
             int keySize = key.remaining();
             ByteUtils.writeVarint(keySize, out.buffer());
-            Utils.writeTo(out, key);
+            Utils.writeTo(out, key, keySize);
         }
 
         if (value == null) {
@@ -245,7 +245,7 @@ public class DefaultRecord implements Record {
         } else {
             int valueSize = value.remaining();
             ByteUtils.writeVarint(valueSize, out.buffer());
-            Utils.writeTo(out, value);
+            Utils.writeTo(out, value, valueSize);
         }
 
         if (headers == null)
