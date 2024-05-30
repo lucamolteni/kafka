@@ -161,6 +161,7 @@ public class DefaultRecord implements Record {
      * Write the record to `out` and return its size.
      */
     public static int writeTo(DataOutputStream out,
+                              ByteBufferOutputStream byteBufferOutputStream,
                               int offsetDelta,
                               long timestampDelta,
                               ByteBuffer key,
@@ -180,7 +181,11 @@ public class DefaultRecord implements Record {
         } else {
             int keySize = key.remaining();
             ByteUtils.writeVarint(keySize, out);
-            Utils.writeTo(out, key, keySize);
+            if (byteBufferOutputStream != null) {
+                Utils.writeTo(byteBufferOutputStream, key, keySize);
+            } else {
+                Utils.writeTo(out, key, keySize);
+            }
         }
 
         if (value == null) {
@@ -188,7 +193,11 @@ public class DefaultRecord implements Record {
         } else {
             int valueSize = value.remaining();
             ByteUtils.writeVarint(valueSize, out);
-            Utils.writeTo(out, value, valueSize);
+            if (byteBufferOutputStream != null) {
+                Utils.writeTo(byteBufferOutputStream, value, valueSize);
+            } else {
+                Utils.writeTo(out, value, valueSize);
+            }
         }
 
         if (headers == null)
@@ -210,63 +219,6 @@ public class DefaultRecord implements Record {
                 ByteUtils.writeVarint(-1, out);
             } else {
                 ByteUtils.writeVarint(headerValue.length, out);
-                out.write(headerValue);
-            }
-        }
-
-        return ByteUtils.sizeOfVarint(sizeInBytes) + sizeInBytes;
-    }
-
-    public static int writeTo(ByteBufferOutputStream out,
-                              int offsetDelta,
-                              long timestampDelta,
-                              ByteBuffer key,
-                              ByteBuffer value,
-                              Header[] headers) throws IOException {
-        int sizeInBytes = sizeOfBodyInBytes(offsetDelta, timestampDelta, key, value, headers);
-        ByteUtils.writeVarint(sizeInBytes, out.buffer());
-
-        byte attributes = 0; // there are no used record attributes at the moment
-        out.write(attributes);
-
-        ByteUtils.writeVarlong(timestampDelta, out.buffer());
-        ByteUtils.writeVarint(offsetDelta, out.buffer());
-
-        if (key == null) {
-            ByteUtils.writeVarint(-1, out.buffer());
-        } else {
-            int keySize = key.remaining();
-            ByteUtils.writeVarint(keySize, out.buffer());
-            Utils.writeTo(out, key, keySize);
-        }
-
-        if (value == null) {
-            ByteUtils.writeVarint(-1, out.buffer());
-        } else {
-            int valueSize = value.remaining();
-            ByteUtils.writeVarint(valueSize, out.buffer());
-            Utils.writeTo(out, value, valueSize);
-        }
-
-        if (headers == null)
-            throw new IllegalArgumentException("Headers cannot be null");
-
-        ByteUtils.writeVarint(headers.length, out.buffer());
-
-        for (Header header : headers) {
-            String headerKey = header.key();
-            if (headerKey == null)
-                throw new IllegalArgumentException("Invalid null header key found in headers");
-
-            byte[] utf8Bytes = Utils.utf8(headerKey);
-            ByteUtils.writeVarint(utf8Bytes.length, out.buffer());
-            out.write(utf8Bytes);
-
-            byte[] headerValue = header.value();
-            if (headerValue == null) {
-                ByteUtils.writeVarint(-1, out.buffer());
-            } else {
-                ByteUtils.writeVarint(headerValue.length, out.buffer());
                 out.write(headerValue);
             }
         }

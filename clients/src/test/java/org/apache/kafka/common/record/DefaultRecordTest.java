@@ -59,7 +59,7 @@ public class DefaultRecordTest {
             long timestampDelta = 323;
 
             ByteBufferOutputStream out = new ByteBufferOutputStream(1024);
-            DefaultRecord.writeTo(new DataOutputStream(out), offsetDelta, timestampDelta, record.key(), record.value(),
+            DefaultRecord.writeTo(new DataOutputStream(out), out, offsetDelta, timestampDelta, record.key(), record.value(),
                     record.headers());
             ByteBuffer buffer = out.buffer();
             buffer.flip();
@@ -94,7 +94,7 @@ public class DefaultRecordTest {
         long timestampDelta = 323;
 
         ByteBufferOutputStream out = new ByteBufferOutputStream(1024);
-        DefaultRecord.writeTo(new DataOutputStream(out), offsetDelta, timestampDelta, record.key(), record.value(),
+        DefaultRecord.writeTo(new DataOutputStream(out), out, offsetDelta, timestampDelta, record.key(), record.value(),
                 record.headers());
         ByteBuffer buffer = out.buffer();
         buffer.flip();
@@ -126,7 +126,7 @@ public class DefaultRecordTest {
         long timestampDelta = 323;
 
         ByteBufferOutputStream out = new ByteBufferOutputStream(1024);
-        DefaultRecord.writeTo(new DataOutputStream(out), offsetDelta, timestampDelta, record.key(), record.value(),
+        DefaultRecord.writeTo(new DataOutputStream(out), out, offsetDelta, timestampDelta, record.key(), record.value(),
                 record.headers());
         ByteBuffer buffer = out.buffer();
         buffer.flip();
@@ -462,7 +462,7 @@ public class DefaultRecordTest {
         long timestampDelta = 323;
 
         ByteBufferOutputStream out = new ByteBufferOutputStream(1024);
-        DefaultRecord.writeTo(new DataOutputStream(out), offsetDelta, timestampDelta, key, value, new Header[0]);
+        DefaultRecord.writeTo(new DataOutputStream(out), out, offsetDelta, timestampDelta, key, value, new Header[0]);
         ByteBuffer buffer = out.buffer();
         buffer.flip();
 

@@ -665,7 +665,8 @@ public class MemoryRecordsBuilder implements AutoCloseable {
             if (baseTimestamp == null)
                 baseTimestamp = timestamp;
 
-            int sizeInBytes = DefaultRecord.writeTo(bufferStream,
+            int sizeInBytes = DefaultRecord.writeTo(appendStream,
+                bufferStream,
                 offsetDelta,
                 timestamp - baseTimestamp,
                 record.key(),
@@ -722,12 +723,12 @@ public class MemoryRecordsBuilder implements AutoCloseable {
         ensureOpenForRecordAppend();
         int offsetDelta = (int) (offset - baseOffset);
         long timestampDelta = timestamp - baseTimestamp;
-        int sizeInBytes;
-        if (CompressionType.NONE == compressionType) {
-            sizeInBytes = DefaultRecord.writeTo(bufferStream, offsetDelta, timestampDelta, key, value, headers);
-        } else {
-            sizeInBytes = DefaultRecord.writeTo(appendStream, offsetDelta, timestampDelta, key, value, headers);
-        }
+        // Writing to the buffer byteBufferOutputstream is faster
+        // But it's not supported when using compressed output streams
+        ByteBufferOutputStream byteBufferOutputStream = compressionType == CompressionType.NONE ? bufferStream : null;
+        int sizeInBytes =
+                DefaultRecord.writeTo(appendStream, byteBufferOutputStream, offsetDelta, timestampDelta, key, value,
+                                      headers);
         recordWritten(offset, timestamp, sizeInBytes);
     }
 
