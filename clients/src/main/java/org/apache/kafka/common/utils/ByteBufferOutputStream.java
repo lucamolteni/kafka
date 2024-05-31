@@ -79,24 +79,30 @@ public class ByteBufferOutputStream extends OutputStream {
         buffer.put(sourceBuffer);
     }
 
-
     public void write(ByteBuffer sourceBuffer, int length) {
+        writeToBuffer(buffer, sourceBuffer, length);
+    }
+    
+    protected void writeToBuffer(ByteBuffer targetBuffer, ByteBuffer sourceBuffer, int length) {
+        // ensureRemaning reset the current position
+        int currentPosition = targetBuffer.position();
         ensureRemaining(length);
-        int currentPosition = buffer.position();
+        // use the method instead of the field so that it can use nioBuffer in kroxy
+        targetBuffer = buffer(); // ugly hack as ensureRemaining modifies the instance buffer
         // This is a workaround for the fact that ByteBuffer.put(ByteBuffer) is not available in Java 9
         try {
-            BYTE_BUFFER_WRITE_OFFSET.invoke(buffer, currentPosition, sourceBuffer,
-                                                            sourceBuffer.position(),
+            BYTE_BUFFER_WRITE_OFFSET.invoke(targetBuffer, currentPosition, sourceBuffer,
+                                            sourceBuffer.position(),
                                             length);
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
         // We need to manually update the position since when using this type of copy
         // The positions of both buffers are unchanged.
-        buffer.position(currentPosition + length);
+        targetBuffer.position(currentPosition + length);
     }
 
-    private static final MethodHandle BYTE_BUFFER_WRITE_OFFSET;
+    protected static final MethodHandle BYTE_BUFFER_WRITE_OFFSET;
 
     static {
         MethodHandle byteBufferWriteOffset = null;
